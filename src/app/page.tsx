@@ -23,6 +23,7 @@ export default async function Home() {
       </div>
     );
   } catch (error) {
+    console.log("Error fetching initial truths:", error);
     return <ErrorFallback error={error as Error} />;
   }
 }
