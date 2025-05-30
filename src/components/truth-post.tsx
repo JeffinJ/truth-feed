@@ -121,6 +121,11 @@ export default function TruthPost({ truth }: TruthPostProps) {
                         </div>
                         <div className='col-span-4 p-2 truncate'>
                             {renderContentAsText(truth.content)}
+                            {truth.media_urls && truth.media_urls.length > 0 && (
+                                <span className="text-gray-400 text-sm ml-2">
+                                    {truth.media_urls.length} media item{truth.media_urls.length > 1 ? 's' : ''}
+                                </span> 
+                            )}
                         </div>
                     </div>
                 </AccordionTrigger>
@@ -129,30 +134,29 @@ export default function TruthPost({ truth }: TruthPostProps) {
                         <div className='py-2'>
                             {renderContent(truth.content)}
                         </div>
-                        {truth.media_url && truth.media_url.length > 0 && (
+                        {truth.media_urls && truth.media_urls.length > 0 && (
                             <div className="mb-3">
-                                <div className="text-sm font-medium mb-2">
-                                    Media ({truth.media_url.length}):
+                                <div className="text-sm mb-2 text-sky-500 font-semibold">
+                                    Attached Media ({truth.media_urls.length}):
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    {truth.media_url.map((url, index) => (
-                                        <div key={index} className="relative">
-                                            <Image
-                                                src={url}
-                                                alt={`Media ${index + 1}`}
-                                                className="w-full h-48 object-cover rounded border"
-                                                width={500}
-                                                height={300}
-                                                loading="lazy"
-                                                onError={(e: unknown) => {
-                                                    console.error("Image failed to load:", e);
-                                                }}
-                                            />
-                                            <div
-                                                className="w-full h-48 bg-gray-200 rounded border flex items-center justify-center"
-                                            >
-                                                Image failed to load
-                                            </div>
+                                <div className="flex flex-wrap">
+                                    {truth.media_urls.map((url, index) => (
+                                        <div key={index} className="rouded-lg">
+                                            {url.endsWith('.mp4') ? (
+                                                <video
+                                                    src={url}
+                                                    controls
+                                                    className="max-w-full h-auto rounded-lg mb-2"
+                                                />
+                                            ) : (
+                                                <Image
+                                                    src={url}
+                                                    alt={`Media ${index + 1}`}
+                                                    width={500}
+                                                    height={500}
+                                                    className="max-w-full h-auto rounded-lg mb-2"
+                                                />
+                                            )}
                                         </div>
                                     ))}
                                 </div>

@@ -1,7 +1,7 @@
 export type Truth = {
     id: number;
     content: string;
-    media_url: string[];
+    media_urls: string[];
     timestamp: string;
     url: string;
 };
