@@ -71,19 +71,20 @@ export default function TruthPost({ truth }: TruthPostProps) {
 
     return (
         <Accordion type="single" collapsible className="w-full text-white">
-            <AccordionItem value={truth.id.toString()} className='px-14' >
+            <AccordionItem value={truth.id.toString()} className='px-5 sm:px-14' >
                 <AccordionTrigger>
-                    <div className=" text-white grid grid-cols-8 w-full">
+                    <div className=" text-white grid grid-cols-4 sm:grid-cols-8 w-full">
                         <div className='col-span-1 items-start justify-start flex'>
                             {truth.timestamp ? (
-                                <div className='flex flex-col items-start justify-center text-xs text-gray-400'>
-                                    <div>{date}</div>
+                                <div className='flex flex-col items-start justify-start sm:justify-center text-xs text-gray-400'>
+                                    {/* show date on mobile screens */}
+                                    <div className='hidden sm:block'>{date}</div>
                                     <div>{time}</div>
                                 </div>
                             ) : "No timestamp available"}
                         </div>
-                        <div className='col-span-7 flex flex-col justify-start '>
-                            <div className='line-clamp-2'>
+                        <div className='col-span-3 sm:col-span-7 flex flex-col justify-start '>
+                            <div className='line-clamp-2 text-sm sm:text-base'>
                                 {renderContentAsText(truth.content)}
                             </div>
                             <div>
