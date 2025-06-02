@@ -1,8 +1,9 @@
 export type Truth = {
-    id: number;
+    id: string;
     content: string;
     media_urls: string[];
     timestamp: string;
+    ai_context: string;
     url: string;
 };
 

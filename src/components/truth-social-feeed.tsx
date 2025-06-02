@@ -1,35 +1,13 @@
-"use client"
+"use client";
 
 import { TruthResponse } from "@/types/truth.types";
 import TruthPost from "./truth-post";
 import { useTruthSocialFeed } from "@/hooks/truth-stream-hook";
+import { CONNECTION_STATUS_CONFIG } from "@/types/sse.types";
 
 type TruthSocialFeedProps = {
     initialTruths: TruthResponse
 };
-
-const CONNECTION_STATUS_CONFIG = {
-    connecting: {
-        bg: "bg-yellow-500",
-        text: "Connecting...",
-        textColor: "text-yellow-200"
-    },
-    connected: {
-        bg: "bg-green-500",
-        text: "Connected",
-        textColor: "text-green-200"
-    },
-    error: {
-        bg: "bg-red-500",
-        text: "Connection Error",
-        textColor: "text-red-200"
-    },
-    disconnected: {
-        bg: "bg-gray-500",
-        text: "Disconnected",
-        textColor: "text-gray-200"
-    }
-} as const;
 
 export default function TruthSocialFeed({ initialTruths }: TruthSocialFeedProps) {
 
@@ -49,7 +27,7 @@ export default function TruthSocialFeed({ initialTruths }: TruthSocialFeedProps)
     const handleRetry = () => {
         reconnect();
     };
-    
+
     return (
         <div className="max-w-4xl mx-auto ring-1 ring-gray-700 rounded bg-gray-900">
             {/* Header */}
@@ -105,11 +83,12 @@ export default function TruthSocialFeed({ initialTruths }: TruthSocialFeedProps)
                             )}
                         </div>
                     </div>
-                ) : (
-                    truths.map((truth) => (
-                        <TruthPost key={truth.id} truth={truth} />
-                    ))
-                )}
+                ) : (truths.map((truth) => (
+                    <TruthPost
+                        key={truth.id}
+                        truth={truth}
+                    />
+                )))}
             </main>
         </div>
     );

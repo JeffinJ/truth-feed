@@ -28,19 +28,42 @@ export function useTruthSocialFeed(options: UseTruthSocialFeedOptions = {}): Use
         reconnectDelay = 2000
     } = options;
 
-    const [truths, setTruths] = useState<Truth[]>(initialTruths);
+    const [truthsMap, setTruthsMap] = useState<Map<string, Truth>>(() => {
+        const map = new Map<string, Truth>();
+        initialTruths.forEach(truth => {
+            map.set(truth.id, truth);
+        });
+        return map;
+    });
+
     const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("connecting");
 
     const eventSourceRef = useRef<EventSource | null>(null);
     const reconnectAttemptsRef = useRef(0);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const addNewTruths = useCallback((newTruths: Truth[]) => {
-        setTruths(prevTruths => {
-            // Prevent duplicates by filtering out truths that already exist
-            const existingIds = new Set(prevTruths.map(t => t.id));
-            const uniqueNewTruths = newTruths.filter(truth => !existingIds.has(truth.id));
-            return [...uniqueNewTruths, ...prevTruths];
+    const addNewTruthsToMap = useCallback((newTruths: Truth[]) => {
+        setTruthsMap(prevMap => {
+            const updatedMap = new Map(prevMap);
+            newTruths.forEach(truth => {
+                if (!updatedMap.has(truth.id)) {
+                    updatedMap.set(truth.id, truth);
+                }
+            });
+            return updatedMap;
+        });
+    }, []);
+
+
+    const updateTruthsMap = useCallback((updatedTruths: Truth[]) => {
+        setTruthsMap(prevMap => {
+            const updatedMap = new Map(prevMap);
+            updatedTruths.forEach(truth => {
+                if (updatedMap.has(truth.id)) {
+                    updatedMap.set(truth.id, { ...updatedMap.get(truth.id), ...truth });
+                }
+            });
+            return updatedMap;
         });
     }, []);
 
@@ -67,13 +90,12 @@ export function useTruthSocialFeed(options: UseTruthSocialFeedOptions = {}): Use
             eventSourceRef.current = null;
         }
 
-        // Auto-reconnect logic
         if (autoReconnect && reconnectAttemptsRef.current < maxReconnectAttempts) {
             reconnectAttemptsRef.current += 1;
             console.log(`Attempting to reconnect (${reconnectAttemptsRef.current}/${maxReconnectAttempts})...`);
 
             reconnectTimeoutRef.current = setTimeout(() => {
-                connect();
+                // Attempt to reconnect
             }, reconnectDelay);
         } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
             console.error("Max reconnection attempts reached");
@@ -89,7 +111,6 @@ export function useTruthSocialFeed(options: UseTruthSocialFeedOptions = {}): Use
             return;
         }
 
-        // Clean up existing connection
         disconnect();
         setConnectionStatus("connecting");
 
@@ -99,18 +120,30 @@ export function useTruthSocialFeed(options: UseTruthSocialFeedOptions = {}): Use
 
             eventSource.onopen = () => {
                 setConnectionStatus("connected");
-                reconnectAttemptsRef.current = 0; // Reset on successful connection
+                reconnectAttemptsRef.current = 0;
                 console.log("SSE connection established");
             };
 
             eventSource.onerror = handleEventSourceError;
 
-            eventSource.addEventListener("new_truths", (event) => {
+            eventSource.addEventListener("truths", (event) => {
                 try {
-                    const { data: truthsArray } = JSON.parse(event.data);
-                    if (Array.isArray(truthsArray) && truthsArray.length > 0) {
-                        addNewTruths(truthsArray);
+                    const parsed = JSON.parse(event.data);
+                    const eventType = parsed.type;
+                    const truthData: Truth[] = parsed.data;
+
+                    switch (eventType) {
+                        case "new_truths":
+                            if (Array.isArray(truthData) && truthData.length > 0) addNewTruthsToMap(truthData);
+                            break;
+                        case "truth_ai_update":
+                            if (Array.isArray(truthData) && truthData.length > 0) updateTruthsMap(truthData);
+                            break;
+                        default:
+                            console.warn(`Unhandled event type: ${eventType}`);
+                            break;
                     }
+
                 } catch (error) {
                     console.error("Failed to parse new truths:", error);
                 }
@@ -128,7 +161,7 @@ export function useTruthSocialFeed(options: UseTruthSocialFeedOptions = {}): Use
             console.error("Failed to create EventSource:", error);
             setConnectionStatus("error");
         }
-    }, [disconnect, handleEventSourceError, addNewTruths]);
+    }, [addNewTruthsToMap, disconnect, handleEventSourceError, updateTruthsMap]);
 
     const reconnect = useCallback(() => {
         reconnectAttemptsRef.current = 0;
@@ -145,7 +178,7 @@ export function useTruthSocialFeed(options: UseTruthSocialFeedOptions = {}): Use
     }, [connect, disconnect, clearReconnectTimeout]);
 
     return {
-        truths,
+        truths: Array.from(truthsMap.values()),
         connectionStatus,
         connect,
         disconnect,
