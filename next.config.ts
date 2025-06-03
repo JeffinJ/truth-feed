@@ -14,9 +14,16 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**"
       },
+      {
+        protocol: "https",
+        hostname:"truth-feed.vercel.app",
+        port: "",
+        pathname: "/**"
+      }
 
     ]
   }
 };
 
 export default nextConfig;
+// https://truth-feed.vercel.app
