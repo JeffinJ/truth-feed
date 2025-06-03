@@ -6,7 +6,7 @@ import { useTruthSocialFeed } from "@/hooks/truth-stream-hook";
 import { CONNECTION_STATUS_CONFIG } from "@/types/sse.types";
 
 type TruthSocialFeedProps = {
-    initialTruths: TruthResponse
+    initialTruths: TruthResponse | null;
 };
 
 export default function TruthSocialFeed({ initialTruths }: TruthSocialFeedProps) {
@@ -16,7 +16,7 @@ export default function TruthSocialFeed({ initialTruths }: TruthSocialFeedProps)
         connectionStatus,
         reconnect,
     } = useTruthSocialFeed({
-        initialTruths: initialTruths.data || [],
+        initialTruths: initialTruths?.data || [],
         autoReconnect: true,
         maxReconnectAttempts: 5,
         reconnectDelay: 3000

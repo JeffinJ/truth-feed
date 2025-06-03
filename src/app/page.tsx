@@ -1,9 +1,12 @@
-import TruthFeedContainer from "@/components/truth-feed-container";
+import TruthSocialFeed from "@/components/truth-social-feeed";
+import { getInitialTruths } from "@/server/truth-service";
 
-export default function Home() {
+export default async function Home() {
+  const data = await getInitialTruths();
+  if (!data) throw new Error("No data available");
   return (
     <div className="bg-[#050A0F] min-h-screen p-5 flex flex-col items-center justify-center">
-        <TruthFeedContainer />
+        <TruthSocialFeed initialTruths={data} />
     </div>
   );
 
