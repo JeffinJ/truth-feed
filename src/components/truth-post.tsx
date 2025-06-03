@@ -130,6 +130,7 @@ export default function TruthPost({ truth }: TruthPostProps) {
                                                     alt={`Media ${index + 1}`}
                                                     width={500}
                                                     height={500}
+                                                    unoptimized
                                                     className="max-w-full h-auto rounded-lg mb-2"
                                                 />
                                             )}
